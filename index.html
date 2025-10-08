@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iStore - Your Tech Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #f8f9fa;
+            color: #1a202c;
+        }
+        
+        /* Styles for smooth element appearance */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out forwards;
+            opacity: 0;
+        }
+
+        .fade-in-delay-1 { animation-delay: 0.1s; }
+        .fade-in-delay-2 { animation-delay: 0.2s; }
+        .fade-in-delay-3 { animation-delay: 0.3s; }
+        .fade-in-delay-4 { animation-delay: 0.4s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Modal Animation */
+        #modal-backdrop.hidden, #cart-backdrop.hidden {
+            display: none;
+        }
+        #modal.hidden, #cart-drawer.hidden {
+            display: none;
+        }
+        .modal-enter {
+            animation: modal-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .modal-leave {
+            animation: modal-out 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes modal-in {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes modal-out {
+            from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            to { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+        }
+
+        /* Cart Animation */
+        .cart-enter {
+             animation: cart-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .cart-leave {
+            animation: cart-out 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes cart-in {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        @keyframes cart-out {
+            from { transform: translateX(0); }
+            to { transform: translateX(100%); }
+        }
+
+        /* Cart Counter Animation */
+        .cart-count-pop {
+            animation: pop 0.3s ease-in-out;
+        }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Success Animation */
+        .success-checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #4BB543;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .success-checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        @keyframes stroke {
+            100% { stroke-dashoffset: 0; }
+        }
+        
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="#" class="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM5.5 9.5a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v5a.5.5 0 01-1 0V10H6a.5.5 0 01-.5-.5zm4.5 0a.5.5 0 01.5-.5h2a.5.5 0 010 1h-2a.5.5 0 01-.5-.5zm-3 2a.5.5 0 000 1h5a.5.5 0 000-1h-5z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-xl font-bold text-gray-800">iStore</span>
+                </a>
+                <button id="open-cart-btn" class="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span id="cart-count" class="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-600 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-2 fade-in">The New Lineup</h1>
+        <p class="text-lg text-gray-500 mb-10 fade-in fade-in-delay-1">Choose your perfect iPhone today.</p>
+        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-8">
+            <!-- Product cards will be inserted here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Product Modal -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-300"></div>
+    <div id="modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-2xl shadow-2xl z-50 hidden p-6 md:p-8">
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="flex items-center justify-center bg-gray-100 rounded-xl p-4">
+                <img id="modal-img" src="" alt="Product Image" class="max-h-80 object-contain">
+            </div>
+            <div class="flex flex-col">
+                <h2 id="modal-title" class="text-2xl font-bold text-gray-900 mb-4"></h2>
+                
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-600 mb-2">Storage:</h3>
+                    <div id="storage-options" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <div class="mt-4">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-2">SIM Card:</h3>
+                    <div id="sim-options" class="flex flex-wrap gap-2"></div>
+                </div>
+                
+                <div class="mt-auto pt-6 flex flex-col sm:flex-row gap-3">
+                    <button id="add-to-cart-btn" class="w-full text-white bg-blue-600 hover:bg-blue-700 font-bold rounded-lg text-sm px-5 py-3 text-center transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">Add to Cart</button>
+                    <button id="close-modal-btn" class="w-full text-gray-700 bg-gray-200 hover:bg-gray-300 font-bold rounded-lg text-sm px-5 py-3 text-center transition-colors duration-300">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div id="cart-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-300"></div>
+    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 hidden flex flex-col">
+        <div class="flex items-center justify-between p-5 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-800">Your Cart</h2>
+            <button id="close-cart-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div id="cart-items" class="flex-grow p-5 overflow-y-auto space-y-4">
+            <!-- Cart items will be inserted here -->
+        </div>
+        <div id="cart-footer" class="p-5 border-t border-gray-200">
+            <button id="checkout-btn" class="w-full text-white bg-green-600 hover:bg-green-700 font-bold rounded-lg text-base px-5 py-3.5 text-center transition-colors duration-300">Checkout</button>
+            <button id="clear-cart-btn" class="w-full text-sm text-center text-gray-500 hover:text-red-600 mt-3 transition-colors">Clear Cart</button>
+        </div>
+        <div id="empty-cart-message" class="hidden text-center p-10 m-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <p class="mt-4 text-lg font-semibold text-gray-700">Your cart is empty</p>
+            <p class="text-sm text-gray-500 mt-1">Add some items to get started.</p>
+        </div>
+    </div>
+
+    <!-- Checkout Success Modal -->
+    <div id="success-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-center justify-center">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm mx-auto">
+            <div class="success-checkmark inline-block">
+                <svg class="h-20 w-20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="success-checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="success-checkmark__check" fill="none" stroke="#4BB543" stroke-width="4" stroke-linecap="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mt-5">Order Placed!</h2>
+            <p class="text-gray-600 mt-2">Thank you for your purchase! We'll be in touch shortly to confirm the details.</p>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const products = [
+                { id: 1, name: 'iPhone 17 Pro Max Silver', img: 'https://www.istore.ua/upload/resize_cache/iblock/b3b/bg1ze5avjzewh0hu9jjnkkb8dpunu4vq/275_170_1/iphone_17_pro_max_2tb_esim_silver.png' },
+                { id: 2, name: 'iPhone 17 Pro Max Cosmic Orange', img: 'https://i.ibb.co/JRGLBj3S/17-pro-cosmic-4.png' },
+                { id: 3, name: 'iPhone 17 Black', img: 'https://www.istore.ua/upload/resize_cache/iblock/288/i1clsy22z0tzc8gyrdi3d45hu8qapt1k/275_170_1/iphone_17_256gb_black.png' },
+                { id: 4, name: 'iPhone 17 Mist Blue', img: 'https://www.istore.ua/upload/resize_cache/iblock/71c/3d07sz578d2c6tfm803vtri56lz6yiqm/275_170_1/iphone_17_256gb_mist_blue.png' },
+                { id: 5, name: 'iPhone 16 Pro Max Black Titanium', img: 'https://yabloki.ua/media/cache/sylius_shop_product_thumbnail/b1/5b/iphone-16-pro-max-256-gb-black-titanium-5.png.webp' },
+                { id: 6, name: 'iPhone 16 Pro Max Desert Titanium', img: 'https://yabloki.ua/media/cache/sylius_shop_product_thumbnail/eb/8f/iphone-16-pro-max-256-gb-blue-titanium-5.png.webp' },
+                { id: 7, name: 'iPhone 16 Teal', img: 'https://www.istore.ua/upload/resize_cache/iblock/d76/png1ccblc1vt13eycogx6v3i4c1t0w86/275_170_1/iphone_16_256gb_teal.png' },
+                { id: 8, name: 'iPhone 16 Ultramarine', img: 'https://yabloki.ua/media/cache/sylius_shop_product_thumbnail/53/97/iphone-16-128-gb-blue-5.png.webp' }
+            ];
+            const storageOptions = [
+                { name: '128 GB' },
+                { name: '256 GB' },
+                { name: '512 GB' },
+                { name: '1 TB' }
+            ];
+            const simOptions = ['eSIM', 'Dual SIM'];
+            let cart = [];
+            let currentProduct = null;
+            let selectedStorage = null;
+            let selectedSim = null;
+
+            const productGrid = document.getElementById('product-grid');
+            
+            const modal = document.getElementById('modal');
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const modalImg = document.getElementById('modal-img');
+            const modalTitle = document.getElementById('modal-title');
+            const storageContainer = document.getElementById('storage-options');
+            const simContainer = document.getElementById('sim-options');
+            const addToCartBtn = document.getElementById('add-to-cart-btn');
+
+            const cartDrawer = document.getElementById('cart-drawer');
+            const cartBackdrop = document.getElementById('cart-backdrop');
+            const openCartBtn = document.getElementById('open-cart-btn');
+            const closeCartBtn = document.getElementById('close-cart-btn');
+            const cartCountEl = document.getElementById('cart-count');
+            const cartItemsContainer = document.getElementById('cart-items');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const clearCartBtn = document.getElementById('clear-cart-btn');
+            const emptyCartMessage = document.getElementById('empty-cart-message');
+            const cartFooter = document.getElementById('cart-footer');
+            const successModal = document.getElementById('success-modal-backdrop');
+
+            // --- RENDER PRODUCTS ---
+            function renderProducts() {
+                productGrid.innerHTML = '';
+                products.forEach((product, index) => {
+                    const card = document.createElement('div');
+                    card.className = `product-card bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer fade-in`;
+                    card.style.animationDelay = `${index * 0.05}s`;
+                    card.dataset.productId = product.id;
+                    card.innerHTML = `
+                        <div class="bg-gray-100 flex justify-center items-center h-52">
+                            <img src="${product.img}" alt="${product.name}" class="h-full object-contain transition-transform duration-300 group-hover:scale-105">
+                        </div>
+                        <div class="p-4 h-24 flex items-center justify-center">
+                            <h3 class="font-bold text-base text-gray-800 text-center">${product.name}</h3>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => openModal(product.id));
+                    productGrid.appendChild(card);
+                });
+            }
+
+            // --- MODAL LOGIC ---
+            function openModal(productId) {
+                currentProduct = products.find(p => p.id === productId);
+                selectedStorage = null;
+                selectedSim = null;
+
+                modalImg.src = currentProduct.img;
+                modalTitle.textContent = currentProduct.name;
+
+                renderOptions();
+                updateAddToCartButtonState();
+
+                modalBackdrop.classList.remove('hidden');
+                modal.classList.remove('hidden');
+                modal.classList.remove('modal-leave');
+                modal.classList.add('modal-enter');
+            }
+
+            function closeModal() {
+                modal.classList.add('modal-leave');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modalBackdrop.classList.add('hidden');
+                }, 300);
+            }
+
+            function renderOptions() {
+                storageContainer.innerHTML = '';
+                storageOptions.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'px-4 py-2 text-sm font-medium border rounded-full transition-colors duration-200';
+                    button.textContent = option.name;
+                    button.onclick = () => selectStorage(option);
+                    storageContainer.appendChild(button);
+                });
+                simContainer.innerHTML = '';
+                simOptions.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'px-4 py-2 text-sm font-medium border rounded-full transition-colors duration-200';
+                    button.textContent = option;
+                    button.onclick = () => selectSim(option);
+                    simContainer.appendChild(button);
+                });
+            }
+
+            function selectStorage(option) {
+                selectedStorage = option;
+                [...storageContainer.children].forEach(child => {
+                    child.classList.toggle('bg-blue-600', child.textContent === option.name);
+                    child.classList.toggle('text-white', child.textContent === option.name);
+                    child.classList.toggle('border-blue-600', child.textContent === option.name);
+                });
+                updateAddToCartButtonState();
+            }
+
+            function selectSim(option) {
+                selectedSim = option;
+                [...simContainer.children].forEach(child => {
+                    child.classList.toggle('bg-blue-600', child.textContent === option);
+                    child.classList.toggle('text-white', child.textContent === option);
+                    child.classList.toggle('border-blue-600', child.textContent === option);
+                });
+                updateAddToCartButtonState();
+            }
+
+            function updateAddToCartButtonState() {
+                addToCartBtn.disabled = !selectedStorage || !selectedSim;
+            }
+
+            addToCartBtn.addEventListener('click', () => {
+                const cartItem = {
+                    ...currentProduct,
+                    storage: selectedStorage.name,
+                    sim: selectedSim,
+                    cartId: Date.now() 
+                };
+                cart.push(cartItem);
+                updateCart();
+                closeModal();
+            });
+
+            // --- CART LOGIC ---
+            function openCart() {
+                cartBackdrop.classList.remove('hidden');
+                cartDrawer.classList.remove('hidden');
+                cartDrawer.classList.remove('cart-leave');
+                cartDrawer.classList.add('cart-enter');
+            }
+
+            function closeCart() {
+                cartDrawer.classList.add('cart-leave');
+                setTimeout(() => {
+                    cartDrawer.classList.add('hidden');
+                    cartBackdrop.classList.add('hidden');
+                }, 400);
+            }
+
+            function updateCart() {
+                renderCartItems();
+                updateCartCount();
+                toggleEmptyCartMessage();
+
+                cartCountEl.classList.add('cart-count-pop');
+                cartCountEl.addEventListener('animationend', () => {
+                    cartCountEl.classList.remove('cart-count-pop');
+                }, { once: true });
+            }
+
+            function renderCartItems() {
+                cartItemsContainer.innerHTML = '';
+                cart.forEach(item => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'flex items-center gap-4 bg-gray-50 p-3 rounded-lg';
+                    itemEl.innerHTML = `
+                        <img src="${item.img}" alt="${item.name}" class="w-16 h-16 object-contain bg-white rounded-md p-1">
+                        <div class="flex-grow">
+                            <p class="font-semibold text-sm text-gray-800">${item.name}</p>
+                            <p class="text-xs text-gray-500">${item.storage}, ${item.sim}</p>
+                        </div>
+                        <button data-cart-id="${item.cartId}" class="remove-item-btn p-2 rounded-full hover:bg-red-100 text-gray-500 hover:text-red-600 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    `;
+                    cartItemsContainer.appendChild(itemEl);
+                });
+                
+                document.querySelectorAll('.remove-item-btn').forEach(btn => {
+                   btn.addEventListener('click', (e) => {
+                       const cartId = Number(e.currentTarget.dataset.cartId);
+                       cart = cart.filter(item => item.cartId !== cartId);
+                       updateCart();
+                   })
+                });
+            }
+            
+            function toggleEmptyCartMessage() {
+                const isEmpty = cart.length === 0;
+                emptyCartMessage.classList.toggle('hidden', !isEmpty);
+                cartFooter.classList.toggle('hidden', isEmpty);
+            }
+
+            function updateCartCount() {
+                cartCountEl.textContent = cart.length;
+            }
+
+            function clearCart() {
+                cart = [];
+                updateCart();
+            }
+
+            function handleCheckout() {
+                if (cart.length === 0) return;
+                
+                closeCart();
+                successModal.classList.remove('hidden');
+                successModal.classList.add('flex');
+                
+                // Reset checkmark animation
+                const checkmark = successModal.querySelector('.success-checkmark');
+                checkmark.innerHTML = checkmark.innerHTML;
+
+                setTimeout(() => {
+                    successModal.classList.add('hidden');
+                    successModal.classList.remove('flex');
+                }, 3000);
+                
+                clearCart();
+            }
+
+            // --- EVENT LISTENERS ---
+            modalBackdrop.addEventListener('click', closeModal);
+            closeModalBtn.addEventListener('click', closeModal);
+            openCartBtn.addEventListener('click', openCart);
+            closeCartBtn.addEventListener('click', closeCart);
+            cartBackdrop.addEventListener('click', closeCart);
+            clearCartBtn.addEventListener('click', clearCart);
+            checkoutBtn.addEventListener('click', handleCheckout);
+
+
+            // --- INITIALIZATION ---
+            renderProducts();
+            updateCart();
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
